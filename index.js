@@ -9,6 +9,7 @@ import * as THREE from 'three';
 
 import Model3DScene from './scenes/3DModel.js';
 import Scene3JS from './scenes/3JSModel.js';
+import ModelsTesting from './scenes/ModelsTesting.js';
 
 // Size of video stream
 let VIDEO_WIDTH, VIDEO_HEIGHT;
@@ -105,7 +106,10 @@ function init(module) {
   camera = new THREE.PerspectiveCamera(45, aspectRatio, 0.1, 100);
 
   let scene = new Scene3JS();
-  let scene_models = new Model3DScene();
+  // let scene_models = new Model3DScene(); // Old models
+
+  let scene_models = new Map();
+  ModelsTesting.initFBXModelScenes(scene_models);
 
   renderer = new THREE.WebGLRenderer({
     canvas: canvasOutput,
@@ -153,14 +157,23 @@ function init(module) {
     // Rendering depends on marker id. If no marker in scene, it clear all.
     // It should be like ' current_3Dmodel = all_3Dmodels[ id ] '
     let id_marker = cam_par[0];
+
+    if (id_marker > 0) {
+      console.log('Marker ID:', id_marker);
+    }
+
     if (id_marker === 0 || id_marker === 3) {
       camera = set_camera(camera, cam_par);
       renderer.render(scene, camera);
     } else if (id_marker > 0) {
       const scene3D = scene_models.get(id_marker);
       // console.log('3d Model');
-      camera = set_camera(camera, cam_par);
-      renderer.render(scene3D, camera);
+      if (scene3D) {
+        camera = set_camera(camera, cam_par);
+        renderer.render(scene3D, camera);
+      } else {
+        console.warn('No scene associted with marker ID:', id_marker);
+      }
     } else {
       renderer.clear();
     }

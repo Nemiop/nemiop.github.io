@@ -1,0 +1,36 @@
+# 3ds Max Wavefront OBJ Exporter v0.97b - (c)2007 guruware
+# File Created: 24.05.2014 14:54:26
+
+newmtl DCHRNPCICOVIL133_MAT
+	Ns 80.0000
+	Ni 1.5000
+	d 1.0000
+	Tr 0.0000
+	Tf 1.0000 1.0000 1.0000 
+	illum 2
+	Ka 0.0000 0.0000 0.0000
+	Kd 0.0000 0.0000 0.0000
+	Ks 1.0000 1.0000 1.0000
+	Ke 0.0000 0.0000 0.0000
+	map_Ka F:\Gorilla Grodd\Map\DIFFUSE.tga
+	map_Kd F:\Gorilla Grodd\Map\DIFFUSE.tga
+	map_Ks F:\Gorilla Grodd\Map\FX.tga
+	map_bump F:\Gorilla Grodd\Map\NORMAL.tga
+	bump F:\Gorilla Grodd\Map\NORMAL.tga
+
+newmtl Cape
+	Ns 80.0000
+	Ni 1.5000
+	d 1.0000
+	Tr 0.0000
+	Tf 1.0000 1.0000 1.0000 
+	illum 2
+	Ka 0.0000 0.0000 0.0000
+	Kd 0.0000 0.0000 0.0000
+	Ks 1.0000 1.0000 1.0000
+	Ke 0.0000 0.0000 0.0000
+	map_Ka F:\Gorilla Grodd\Map\CAPE_DIFFUSE.tga
+	map_Kd F:\Gorilla Grodd\Map\CAPE_DIFFUSE.tga
+	map_Ks F:\Gorilla Grodd\Map\CAPE_FX.tga
+	map_bump F:\Gorilla Grodd\Map\CAPE_NORMAL.tga
+	bump F:\Gorilla Grodd\Map\CAPE_NORMAL.tga
