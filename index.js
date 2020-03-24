@@ -5,8 +5,10 @@
 /* eslint-disable prefer-const */
 /* eslint-disable no-use-before-define */
 /* eslint-disable no-var */
-const { Model3DScene } = require('./scenes/3DModel.js');
-const { Scene3JS } = require('./scenes/3JSModel.js');
+import * as THREE from 'three';
+
+import Model3DScene from './scenes/3DModel.js';
+import Scene3JS from './scenes/3JSModel.js';
 
 // Size of video stream
 let VIDEO_WIDTH, VIDEO_HEIGHT;
@@ -155,7 +157,7 @@ function init(module) {
       camera = set_camera(camera, cam_par);
       renderer.render(scene, camera);
     } else if (id_marker > 0) {
-      scene3D = scene_models.get(id_marker);
+      const scene3D = scene_models.get(id_marker);
       // console.log('3d Model');
       camera = set_camera(camera, cam_par);
       renderer.render(scene3D, camera);
@@ -205,9 +207,9 @@ const getImageData = () => {
 
 const addMarkerFromImg = (module, addMarker, markerData, width, height) => {
   console.log('Load Marker');
-  bufferSizeMarker = width * height * 4;
+  const bufferSizeMarker = width * height * 4;
 
-  markerBuf = module._malloc(bufferSizeMarker);
+  const markerBuf = module._malloc(bufferSizeMarker);
   module.HEAPU8.set(markerData.data, markerBuf);
 
   addMarker(markerBuf, width, height);

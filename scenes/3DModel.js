@@ -1,3 +1,6 @@
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+
 class Model3DScene {
   constructor() {
     let sceneModels = new Map();
@@ -23,10 +26,10 @@ function init3Dmodel(sceneModels) {
   // {"id": 0, "path" : "models/dancing/scene.gltf", "position" : [0.0, 0.0, 0.0], "rotation" : [1.57, -1.0, 0.0], "scale" : 0.4}]
   // eslint-disable-next-line max-len
   // Load all model. Models should be 'glb' or 'gltf' - other types are not supported or supported badly.
-  let objLoader = new THREE.GLTFLoader();
+  let objLoader = new GLTFLoader();
   const config = JSON.parse(configJSON);
   config.models.forEach((m) => {
-    objLoader.load(m.path, (g) => {      
+    objLoader.load(m.path, (g) => {
       const model = g.scene;
       model.scale.set(m.scale, m.scale, m.scale);
       model.rotation.set(m.rotation[0], m.rotation[1], m.rotation[2]);
@@ -38,7 +41,7 @@ function init3Dmodel(sceneModels) {
 
       sceneModels.set(m.id, sceneModel);
     }, (e) => {
-      console.error('MODEL ERROR e=', e);
+      console.log('Loading model');
     });
   });
 }
@@ -61,4 +64,4 @@ function addLight(scene){
   scene.add(light4);
 }
 
-exports.Model3DScene = Model3DScene;
+export default Model3DScene;

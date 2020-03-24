@@ -1,17 +1,33 @@
-const { watch, dest } = require('gulp');
-const browserify = require('browserify');
-const source = require('vinyl-source-stream');
+const { watch } = require('gulp');
+const webpack = require('webpack');
+const path = require('path');
 
-const b = browserify('./index.js');
+const compiler = webpack({
+  mode: 'development',
+  entry: './index.js',
+  output: {
+    filename: 'bundle.js',
+    path: path.resolve(__dirname)
+  }
+});
 
 function bundle() {
-  return b.bundle()
-    .pipe(source('bundle.js'))
-    .pipe(dest('./'));
+  return new Promise((resolve, reject) => {
+    compiler.run((err, stats) => {
+      if (err) {
+        console.error(err);
+        reject(err);
+      }
+      console.log(stats.toString({
+        colors: true
+      }));
+      resolve();
+    });
+  });
 }
 
 function watchFiles() {
-  watch('./index.js', { ignoreInitial: false }, bundle);
+  watch(['./index.js', './scenes/*.js'], { ignoreInitial: false }, bundle);
 }
 
 exports.default = watchFiles;

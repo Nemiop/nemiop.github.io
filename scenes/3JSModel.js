@@ -1,3 +1,5 @@
+import * as THREE from 'three';
+
 class Scene3JS {
   constructor() {
     const scene = new THREE.Scene();
@@ -40,4 +42,4 @@ function initScene3JS(scene) {
   c4.position.set(0, -0.5, 0);
 }
 
-exports.Scene3JS = Scene3JS;
+export default Scene3JS;
