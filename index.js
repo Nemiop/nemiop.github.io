@@ -7,7 +7,7 @@
 /* eslint-disable no-var */
 import * as THREE from 'three';
 
-import Model3DScene from './scenes/3DModel.js';
+// import Model3DScene from './scenes/3DModel.js';
 import Scene3JS from './scenes/3JSModel.js';
 import ModelsTesting from './scenes/ModelsTesting.js';
 
@@ -108,8 +108,9 @@ function init(module) {
   let scene = new Scene3JS();
   // let scene_models = new Model3DScene(); // Old models
 
-  let scene_models = new Map();
-  ModelsTesting.initFBXModelScenes(scene_models);
+  let scene_models = new ModelsTesting();
+
+  var clock = new THREE.Clock();
 
   renderer = new THREE.WebGLRenderer({
     canvas: canvasOutput,
@@ -133,6 +134,11 @@ function init(module) {
   // eslint-disable-next-line func-names
   const capture = function () {
     // var t0 = Date.now();
+
+    if (window.threejsMixer) {
+      var delta = clock.getDelta();
+      window.threejsMixer.update( delta );
+    }
 
     canvasContext.drawImage(video, 0, 0, imageWidth, imageHeight);
 
