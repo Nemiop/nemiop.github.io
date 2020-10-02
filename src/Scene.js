@@ -62,26 +62,42 @@ class Scene {
       });
     }
 
-    if (this.scene) {
-      this.scene.children.forEach((obj) => {
-        this.scene.remove(obj);
-      });
-    }
+    this.disposeScene(this.scene);
 
-    this.scene.dispose();
     this.scene = undefined;
     this.model = undefined;
   }
 
+  disposeScene(obj) {
+    if (obj !== null) {
+      for (let i = 0; i < obj.children.length; i++) {
+        this.disposeScene(obj.children[i]);
+      }
+      if (obj.geometry) {
+        obj.geometry.dispose();
+        obj.geometry = undefined;
+      }
+      if (obj.material) {
+        if (obj.material.map) {
+          obj.material.map.dispose();
+          obj.material.map = undefined;
+        }
+        obj.material.dispose();
+        obj.material = undefined;
+      }
+    }
+    obj = undefined;
+  }
+
   addLights(scene) {
-    var ambient = new THREE.AmbientLight(0x222222);
+    const ambient = new THREE.AmbientLight(0x222222);
     scene.add(ambient);
 
-    var directionalLight = new THREE.DirectionalLight(0xdddddd, 4);
+    const directionalLight = new THREE.DirectionalLight(0xdddddd, 4);
     directionalLight.position.set(0, 0, 1).normalize();
     scene.add(directionalLight);
 
-    var spot1 = new THREE.SpotLight(0xffffff, 1);
+    const spot1 = new THREE.SpotLight(0xffffff, 1);
     spot1.position.set(5, 10, 5);
     spot1.angle = 0.50;
     spot1.penumbra = 0.75;

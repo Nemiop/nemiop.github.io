@@ -14,7 +14,7 @@ import ProgressBar from './ProgressBar';
 import Container from './Container';
 import Scene from '../Scene';
 
-var onProcess,
+let onProcess,
   wasmModule,
   modelScene,
   camera,
@@ -27,9 +27,8 @@ var onProcess,
   bufferSize,
   clock,
   pmremGenerator,
-  gltfLoader,
-  requestedFrameId,
-  animationMixer;
+  animationMixer,
+  requestAnimationId;
 
 // This canvas element that used for capture video frames
 const frameCaptureCanvas = document.getElementById('captureCanvas');
@@ -38,10 +37,10 @@ const canvasContext = frameCaptureCanvas.getContext('2d');
 canvasContext.imageSmoothingEnabled = false;
 canvasContext.globalCompositeOperation = 'copy';
 
-var canvasOutput = document.getElementById('canvasOutput');
-var video = document.getElementById('video');
+const canvasOutput = document.getElementById('canvasOutput');
+const video = document.getElementById('video');
 
-gltfLoader = new GLTFLoader();
+const gltfLoader = new GLTFLoader();
 
 // Configure metrics
 const statsFPS = new Stats();
@@ -79,6 +78,38 @@ function calculateCameraScale() {
 
 function initEmscriptenFunctionsAndMarkers() {
   // Prepare Emscripten functions
+  /*
+  To connect C++ and JS we build a bridge file ‘webar_demo.cpp’ and use its functions after wasm compilation in JS
+
+  onInitDef(void const *source, int width, int height)
+      source is a pointer to the memory address with the frame. You also can transfer the whole image, but it is too long.
+      width and height are the corresponding size parameters of the input frame.   
+
+      At the beginning, before AR processing in loop, we initialize two engines. The first processes the input frame to detect the marker in the scene and then track it. The second one converts found homography to the 3JS parameters, depending on the camera angle of view. (45 degrees by default)
+
+  addMarker(void *marker, int width_marker, int height_marker)
+      marker is image or the pointer to the corresponding memory address
+      width_marker and height_marker are size parameters of each marker
+  
+      After the engines are initialized, add markers to the marker storage. The process engine tries to detect any of the downloaded markers. The more markers are loaded - the more time engine needs to spend at the detection stage.
+      Added markers are downsized to the chosen marker parameters. Also the engine precalculates keypoints and descriptors to save time in the loop and do not this stuff every time
+  
+  finalizeMarkers()
+      It is called after the adding of markers is completed. Stored markers are grouped into a single array. You cannot add markers after this function was called. Also, ‘onProcess’ function calls this by itself in the first run. 
+  
+  float array onProcess(void *source, int width, int height, int frameNum)
+      source  is a pointer to the memory address with the frame. You also can transfer the whole image, but it is too long.
+      width and height are the corresponding size parameters of the input frame.   
+      frameNum is a number of the processed frame. It is useful to conduct performance experiments or debug by additional StatEngine. However, production version does not use StatEngine to save time and improve performance.
+      
+      The main function to process the input frame. It automatically chooses the processing mode: detection or tracking.
+      Output is a pointer to array with parameters (10 float numbers): [0] is the id of the found marker, then numbers from [1] to [9] are camera pose
+ 
+        camera.position.set(par[1] * k, par[2] * k, par[3] * k);
+        camera.lookAt(par[4], par[5], par[6]);
+        camera.up.set(par[7], par[8], par[9]);
+  */
+
   const onInitDef = wasmModule.cwrap('onInitDef', null, ['number', 'number', 'number']);
   const addMarker = wasmModule.cwrap('addMarker', null, ['number', 'number', 'number']);
   const finalizeMarkers = wasmModule.cwrap('finalizeMarkers', null);
@@ -266,7 +297,7 @@ class AugmentedStream extends Component {
 
       if (isStreaming) {
         animationMixer.update(clock.getDelta());
-        requestAnimationFrame(this.capture);
+        requestAnimationId = requestAnimationFrame(this.capture);
       }
     }
 
@@ -278,7 +309,7 @@ class AugmentedStream extends Component {
   handleModelLoading = (xhr) => {
     const newState = { isModelLoading: true };
     if (xhr.lengthComputable) {
-      var percentComplete = (xhr.loaded / xhr.total) * 100;
+      const percentComplete = (xhr.loaded / xhr.total) * 100;
       newState.modelLoadingProgress = Math.round(percentComplete);
     }
     this.setState(newState);
@@ -299,15 +330,17 @@ class AugmentedStream extends Component {
     this.setState(
       (state) => Object.assign(state, { isStreaming: false }),
       () => {
-        cancelAnimationFrame(requestedFrameId);
+        cancelAnimationFrame(requestAnimationId);
+        renderer.dispose();
         renderer.clear();
         modelScene.dispose();
         this.props.onDispose();
         renderer.renderLists.dispose();
-        renderer.dispose();
         modelScene = null;
         cameraParameters = [];
         canvasContext.clearRect(0, 0, frameCaptureCanvas.width, frameCaptureCanvas.height);
+
+        animationMixer = null;
       },
     );
   }
