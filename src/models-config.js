@@ -1,8 +1,8 @@
 /* eslint-disable object-curly-newline */
-// position (hor:vert:depth)
+// position (vertical:horizontal:depth)
 // rotation (hor:vert:2D)
 const modelsConfig = [
-  { id: 0, name: 'Model 1', path: 'models/m1/scene.gltf', position: [-0.5, -0.5, 0.0], rotation: [0.0, 0.0, 0.0], scale: 0.2 },
+  { id: 0, name: 'Model 1', path: 'models/m1/scene.gltf', position: [0, -1.5, 0.0], rotation: [0.0, 0.0, 0.0], scale: 0.2 },
   { id: 1, name: 'Model 2', path: 'models/m2/scene.gltf', position: [0.0, -1.0, 0.0], rotation: [0.0, 1.0, 0.0], scale: 0.004 },
   { id: 2, name: 'Model 3', path: 'models/m3/scene.gltf', position: [-1.0, -1.0, 0.0], rotation: [0.0, 0.0, 0.0], scale: 1.0 },
   { id: 6, name: 'Model 4', path: 'models/m4/scene.gltf', position: [0.0, -0.7, 0.0], rotation: [0.0, Math.PI, 0.0], scale: 1.0 },
