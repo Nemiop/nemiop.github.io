@@ -83,28 +83,28 @@ function initEmscriptenFunctionsAndMarkers() {
 
   onInitDef(void const *source, int width, int height)
       source is a pointer to the memory address with the frame. You also can transfer the whole image, but it is too long.
-      width and height are the corresponding size parameters of the input frame.   
+      width and height are the corresponding size parameters of the input frame.
 
       At the beginning, before AR processing in loop, we initialize two engines. The first processes the input frame to detect the marker in the scene and then track it. The second one converts found homography to the 3JS parameters, depending on the camera angle of view. (45 degrees by default)
 
   addMarker(void *marker, int width_marker, int height_marker)
       marker is image or the pointer to the corresponding memory address
       width_marker and height_marker are size parameters of each marker
-  
+
       After the engines are initialized, add markers to the marker storage. The process engine tries to detect any of the downloaded markers. The more markers are loaded - the more time engine needs to spend at the detection stage.
       Added markers are downsized to the chosen marker parameters. Also the engine precalculates keypoints and descriptors to save time in the loop and do not this stuff every time
-  
+
   finalizeMarkers()
-      It is called after the adding of markers is completed. Stored markers are grouped into a single array. You cannot add markers after this function was called. Also, ‘onProcess’ function calls this by itself in the first run. 
-  
+      It is called after the adding of markers is completed. Stored markers are grouped into a single array. You cannot add markers after this function was called. Also, ‘onProcess’ function calls this by itself in the first run.
+
   float array onProcess(void *source, int width, int height, int frameNum)
       source  is a pointer to the memory address with the frame. You also can transfer the whole image, but it is too long.
-      width and height are the corresponding size parameters of the input frame.   
+      width and height are the corresponding size parameters of the input frame.
       frameNum is a number of the processed frame. It is useful to conduct performance experiments or debug by additional StatEngine. However, production version does not use StatEngine to save time and improve performance.
-      
+
       The main function to process the input frame. It automatically chooses the processing mode: detection or tracking.
       Output is a pointer to array with parameters (10 float numbers): [0] is the id of the found marker, then numbers from [1] to [9] are camera pose
- 
+
         camera.position.set(par[1] * k, par[2] * k, par[3] * k);
         camera.lookAt(par[4], par[5], par[6]);
         camera.up.set(par[7], par[8], par[9]);
@@ -217,6 +217,28 @@ cameraControls.rotateSpeed = 0.87;
 
 clock = new THREE.Clock();
 
+// Create custom click event that will be invoked only when click was in one point without mouse movement
+let pcx = 0;
+let pcy = 0;
+document.addEventListener('mousedown', (e) => {
+  pcx = e.clientX;
+  pcy = e.clientY;
+});
+document.addEventListener('mouseup', (e) => {
+  if (e.clientX === pcx && e.clientY === pcy) {
+    const detail = {
+      clientX: e.clientX,
+      clientY: e.clientY,
+    };
+    const pointClick = new CustomEvent('pointclick', { detail });
+    document.dispatchEvent(pointClick);
+  }
+});
+
+// Mouse and raycaster used for handle user's click on some object of model
+var mouse = new THREE.Vector2();
+var raycaster = new THREE.Raycaster();
+
 // This variable will store camera parameters recieved from computer vision module
 let cameraParameters = [];
 
@@ -306,6 +328,39 @@ class AugmentedStream extends Component {
     statsFPS.end();
   }
 
+  findAndHandleRaycaterIntersects = (event) => {
+    event.preventDefault();
+
+    const { choosedModelConfig } = this.props;
+
+    if (!choosedModelConfig.objectClickHandlers) {
+      return;
+    }
+
+    const { isExploring, isStreaming } = this.state;
+
+    if (isExploring || isStreaming) {
+      mouse.x = (event.detail.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(event.detail.clientY / window.innerHeight) * 2 + 1;
+      raycaster.setFromCamera(mouse, camera);
+      var intersects = raycaster.intersectObjects(modelScene.scene.children, true);
+
+      if (intersects.length > 0) {
+        const intersectedObjectsNames = intersects.map((i) => i.object.name);
+        const handlers = choosedModelConfig.objectClickHandlers;
+        // Intersected objects are ordered from nearest to user objet
+        // So if we get first match of object name and handler, invoke handler and return
+        for (let i = 0; i < intersectedObjectsNames.length; i++) {
+          const objectName = intersectedObjectsNames[i];
+          if (handlers[objectName]) {
+            handlers[objectName]();
+            return;
+          }
+        }
+      }
+    }
+  }
+
   handleModelLoading = (xhr) => {
     const newState = { isModelLoading: true };
     if (xhr.lengthComputable) {
@@ -323,7 +378,12 @@ class AugmentedStream extends Component {
 
       video.play();
       this.init();
+      document.addEventListener('pointclick', this.findAndHandleRaycaterIntersects);
     };
+  }
+
+  componentWillUnmount = () => {
+    document.removeEventListener('pointclick', this.findAndHandleRaycaterIntersects);
   }
 
   dispose = () => {
