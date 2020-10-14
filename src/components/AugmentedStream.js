@@ -220,11 +220,11 @@ clock = new THREE.Clock();
 // Create custom click event that will be invoked only when click was in one point without mouse movement
 let pcx = 0;
 let pcy = 0;
-document.addEventListener('mousedown', (e) => {
+const updatePosition = (e) => {
   pcx = e.clientX;
   pcy = e.clientY;
-});
-document.addEventListener('mouseup', (e) => {
+};
+const checkAndFireEvent = (e) => {
   if (e.clientX === pcx && e.clientY === pcy) {
     const detail = {
       clientX: e.clientX,
@@ -232,6 +232,18 @@ document.addEventListener('mouseup', (e) => {
     };
     const pointClick = new CustomEvent('pointclick', { detail });
     document.dispatchEvent(pointClick);
+  }
+};
+document.addEventListener('mousedown', updatePosition);
+document.addEventListener('mouseup', checkAndFireEvent);
+document.addEventListener('touchstart', (e) => {
+  if (e.touches.length === 1) {
+    updatePosition(e.touches[0]);
+  }
+});
+document.addEventListener('touchend', (e) => {
+  if (e.changedTouches.length === 1) {
+    checkAndFireEvent(e.changedTouches[0]);
   }
 });
 
