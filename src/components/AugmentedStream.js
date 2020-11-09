@@ -110,7 +110,10 @@ function initEmscriptenFunctionsAndMarkers() {
         camera.up.set(par[7], par[8], par[9]);
   */
 
+  const setTuningRegime = wasmModule.cwrap('setTuningRegime', null, ['number']);
   const onInitDef = wasmModule.cwrap('onInitDef', null, ['number', 'number', 'number']);
+  const addMarkerSettings = wasmModule.cwrap('addMarkerSettings', null, ['string']);
+
   const addMarker = wasmModule.cwrap('addMarker', null, ['number', 'number', 'number']);
   const finalizeMarkers = wasmModule.cwrap('finalizeMarkers', null);
   onProcess = wasmModule.cwrap('onProcess', 'number', ['number', 'number', 'number', 'number']);
@@ -130,6 +133,7 @@ function initEmscriptenFunctionsAndMarkers() {
   const temp1 = new Uint8ClampedArray(wasmModule.HEAPU8.buffer, inputBuf, bufferSize);
   temp1.set(imageData.data, 0);
 
+	setTuningRegime(1); //
   onInitDef(inputBuf, imageWidth, imageHeight);
   wasmModule._free(inputBuf);
   wasmModule._free(temp1);
@@ -141,21 +145,30 @@ function initEmscriptenFunctionsAndMarkers() {
   const contextImg = canvasImg.getContext('2d');
   const markers = document.querySelectorAll('img[id*="img"]');
 
-  for (let i = 0; i < markers.length; i++) {
-    const img = markers[i];
-    canvasImg.width = img.width;
-    canvasImg.height = img.height;
-    contextImg.drawImage(img, 0, 0);
-    const markerData = contextImg.getImageData(0, 0, img.width, img.height);
-    const bufferSizeMarker = img.width * img.height * 4;
-    const markerBuf = wasmModule._malloc(bufferSizeMarker);
-    wasmModule.HEAPU8.set(markerData.data, markerBuf);
-    addMarker(markerBuf, img.width, img.height);
-    wasmModule._free(markerBuf);
-    wasmModule._free(markerData);
-  }
-  finalizeMarkers();
-  canvasImg = undefined;
+	fetch("marker_parameters.json")
+	.then(response => response.json())
+	.then(data => {
+		let json_str = JSON.stringify(data);
+    let SettingsJson = json_str.replace(/"/gi, '\"');
+    console.log(SettingsJson);
+		addMarkerSettings(SettingsJson);
+
+    for (let i = 0; i < markers.length; i++) {
+      const img = markers[i];
+      canvasImg.width = img.width;
+      canvasImg.height = img.height;
+      contextImg.drawImage(img, 0, 0);
+      const markerData = contextImg.getImageData(0, 0, img.width, img.height);
+      const bufferSizeMarker = img.width * img.height * 4;
+      const markerBuf = wasmModule._malloc(bufferSizeMarker);
+      wasmModule.HEAPU8.set(markerData.data, markerBuf);
+      addMarker(markerBuf, img.width, img.height);
+      wasmModule._free(markerBuf);
+      wasmModule._free(markerData);
+    }
+    finalizeMarkers();
+    canvasImg = undefined;
+  });
 }
 
 async function loadEnvironmentTexture() {
