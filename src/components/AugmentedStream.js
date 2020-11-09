@@ -110,9 +110,9 @@ function initEmscriptenFunctionsAndMarkers() {
         camera.up.set(par[7], par[8], par[9]);
   */
 
-  const setTuningRegime = module.cwrap('setTuningRegime', null, ['number']);
-  const onInitDef = module.cwrap('onInitDef', null, ['number', 'number', 'number']);
-  const addMarkerSettings = module.cwrap('addMarkerSettings', null, ['string']);
+  const setTuningRegime = wasmModule.cwrap('setTuningRegime', null, ['number']);
+  const onInitDef = wasmModule.cwrap('onInitDef', null, ['number', 'number', 'number']);
+  const addMarkerSettings = wasmModule.cwrap('addMarkerSettings', null, ['string']);
 
   const addMarker = wasmModule.cwrap('addMarker', null, ['number', 'number', 'number']);
   const finalizeMarkers = wasmModule.cwrap('finalizeMarkers', null);
