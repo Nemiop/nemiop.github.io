@@ -149,8 +149,8 @@ function initEmscriptenFunctionsAndMarkers() {
 	.then(response => response.json())
 	.then(data => {
     const markersFolderPath = './images/ar_markers/';
-
     markerInfo = data.markers_settings;
+    console.log("Number of markers: ", markerInfo.length);
     for (let i = 0; i < markerInfo.length; i++) {
       marker_name = markerInfo[i].marker_name;
       let imagePath = `${markersFolderPath}${marker_name}`;
