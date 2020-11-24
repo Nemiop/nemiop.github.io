@@ -166,7 +166,7 @@ function initEmscriptenFunctionsAndMarkers() {
       const markerBuf = wasmModule._malloc(bufferSizeMarker);
       wasmModule.HEAPU8.set(markerData.data, markerBuf);
 
-      marker_id = markerInfo[i].marker_id;
+      const marker_id = markerInfo[i].marker_id;
       addMarker(marker_id, markerBuf, img.width, img.height);
       wasmModule._free(markerBuf);
       wasmModule._free(markerData);
