@@ -168,10 +168,9 @@ function initEmscriptenFunctionsAndMarkers() {
       wasmModule._free(markerBuf);
       wasmModule._free(markerData);
     }
-    finalizeMarkers();
-
 		addMarkerSettings(SettingsJson);
     console.log("Marker Settings were added");
+    finalizeMarkers();
     canvasImg = undefined;
   });
 }
