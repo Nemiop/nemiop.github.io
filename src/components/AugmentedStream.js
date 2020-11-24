@@ -174,7 +174,6 @@ function initEmscriptenFunctionsAndMarkers() {
 
 		let json_str = JSON.stringify(data);
     let SettingsJson = json_str.replace(/"/gi, '\"');
-    console.log(markers.length);
 		addMarkerSettings(SettingsJson);
     console.log("Marker Settings were added");
 
