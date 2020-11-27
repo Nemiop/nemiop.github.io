@@ -87,8 +87,8 @@ function initEmscriptenFunctionsAndMarkers() {
 
       At the beginning, before AR processing in loop, we initialize two engines. The first processes the input frame to detect the marker in the scene and then track it. The second one converts found homography to the 3JS parameters, depending on the camera angle of view. (45 degrees by default)
 
-  addMarker(int marker_id, void *marker, int width_marker, int height_marker)
-      marker is an image or the pointer to the corresponding memory address
+  addMarker(void *marker, int width_marker, int height_marker)
+      marker is image or the pointer to the corresponding memory address
       width_marker and height_marker are size parameters of each marker
 
       After the engines are initialized, add markers to the marker storage. The process engine tries to detect any of the downloaded markers. The more markers are loaded - the more time engine needs to spend at the detection stage.
@@ -110,11 +110,8 @@ function initEmscriptenFunctionsAndMarkers() {
         camera.up.set(par[7], par[8], par[9]);
   */
 
-  const setTuningRegime = wasmModule.cwrap('setTuningRegime', null, ['number']);
   const onInitDef = wasmModule.cwrap('onInitDef', null, ['number', 'number', 'number']);
-  const addMarkerSettings = wasmModule.cwrap('addMarkerSettings', null, ['string']);
-
-  const addMarker = wasmModule.cwrap('addMarker', null, ['number', 'number', 'number', 'number']);
+  const addMarker = wasmModule.cwrap('addMarker', null, ['number', 'number', 'number']);
   const finalizeMarkers = wasmModule.cwrap('finalizeMarkers', null);
   onProcess = wasmModule.cwrap('onProcess', 'number', ['number', 'number', 'number', 'number']);
 
@@ -133,7 +130,6 @@ function initEmscriptenFunctionsAndMarkers() {
   const temp1 = new Uint8ClampedArray(wasmModule.HEAPU8.buffer, inputBuf, bufferSize);
   temp1.set(imageData.data, 0);
 
-	setTuningRegime(1); //
   onInitDef(inputBuf, imageWidth, imageHeight);
   wasmModule._free(inputBuf);
   wasmModule._free(temp1);
@@ -145,35 +141,21 @@ function initEmscriptenFunctionsAndMarkers() {
   const contextImg = canvasImg.getContext('2d');
   const markers = document.querySelectorAll('img[id*="img"]');
 
-	fetch("marker_parameters.json")
-	.then(response => response.json())
-	.then(data => {
-		let json_str = JSON.stringify(data);
-    let SettingsJson = json_str.replace(/"/gi, '\"');
-    console.log(markers.length);
-
-    for (let i = 0; i < markers.length; i++) {
-      const marker_id = i;
-      const img = markers[marker_id];
-      canvasImg.width = img.width;
-      canvasImg.height = img.height;
-      contextImg.drawImage(img, 0, 0);
-      const markerData = contextImg.getImageData(0, 0, img.width, img.height);
-      const bufferSizeMarker = img.width * img.height * 4;
-      const markerBuf = wasmModule._malloc(bufferSizeMarker);
-      wasmModule.HEAPU8.set(markerData.data, markerBuf);
-      console.log("Hi");
-      addMarker(marker_id, markerBuf, img.width, img.height);
-      console.log("Hi 2");
-      wasmModule._free(markerBuf);
-      wasmModule._free(markerData);
-    }
-    finalizeMarkers();
-
-		addMarkerSettings(SettingsJson);
-    console.log("Marker Settings were added");
-    canvasImg = undefined;
-  });
+  for (let i = 0; i < markers.length; i++) {
+    const img = markers[i];
+    canvasImg.width = img.width;
+    canvasImg.height = img.height;
+    contextImg.drawImage(img, 0, 0);
+    const markerData = contextImg.getImageData(0, 0, img.width, img.height);
+    const bufferSizeMarker = img.width * img.height * 4;
+    const markerBuf = wasmModule._malloc(bufferSizeMarker);
+    wasmModule.HEAPU8.set(markerData.data, markerBuf);
+    addMarker(markerBuf, img.width, img.height);
+    wasmModule._free(markerBuf);
+    wasmModule._free(markerData);
+  }
+  finalizeMarkers();
+  canvasImg = undefined;
 }
 
 async function loadEnvironmentTexture() {
