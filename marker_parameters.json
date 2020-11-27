@@ -1,11 +1,11 @@
 {"markers_settings":
 	[
-	{"marker_id" : 0, "marker_name": "M1.png", "heightFrameLK" : 240, "maxTrackedPoints" : 30, "epsTrack" : 0.05, "templateSize" : 75 },
-	{"marker_id" : 1, "marker_name": "M2.png", "heightFrameLK" : 240, "maxTrackedPoints" : 15, "epsTrack" : 0.05, "templateSize" : 75 },
-	{"marker_id" : 2, "marker_name": "M3.png", "heightFrameLK" : 240, "maxTrackedPoints" : 30, "epsTrack" : 0.05, "templateSize" : 75 },
-	{"marker_id" : 3, "marker_name": "M4.png", "heightFrameLK" : 240, "maxTrackedPoints" : 30, "epsTrack" : 0.02, "templateSize" : 75 },
-	{"marker_id" : 4, "marker_name": "M5.png", "heightFrameLK" : 240, "maxTrackedPoints" : 30, "epsTrack" : 0.05, "templateSize" : 75 },
-	{"marker_id" : 6, "marker_name": "M7.png", "heightFrameLK" : 240, "maxTrackedPoints" : 30, "epsTrack" : 0.05, "templateSize" : 75 }
+	{"marker_id" : 0, "heightFrameLK" : 240, "maxTrackedPoints" : 30, "epsTrack" : 0.05, "templateSize" : 75 },
+	{"marker_id" : 1, "heightFrameLK" : 240, "maxTrackedPoints" : 15, "epsTrack" : 0.05, "templateSize" : 75 },
+	{"marker_id" : 2, "heightFrameLK" : 240, "maxTrackedPoints" : 30, "epsTrack" : 0.05, "templateSize" : 75 },
+	{"marker_id" : 3, "heightFrameLK" : 240, "maxTrackedPoints" : 30, "epsTrack" : 0.02, "templateSize" : 75 },
+	{"marker_id" : 4, "heightFrameLK" : 240, "maxTrackedPoints" : 30, "epsTrack" : 0.05, "templateSize" : 75 },
+	{"marker_id" : 5, "heightFrameLK" : 240, "maxTrackedPoints" : 30, "epsTrack" : 0.05, "templateSize" : 75 }
 	]
 }
    

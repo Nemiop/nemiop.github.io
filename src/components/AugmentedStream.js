@@ -143,21 +143,18 @@ function initEmscriptenFunctionsAndMarkers() {
   // When all markers are added, we call 'finalizeMarkers' function to prepare right id for markers.
   let canvasImg = document.createElement('canvas');
   const contextImg = canvasImg.getContext('2d');
-  // const markers = document.querySelectorAll('img[id*="img"]');
+  const markers = document.querySelectorAll('img[id*="img"]');
 
 	fetch("marker_parameters.json")
 	.then(response => response.json())
 	.then(data => {
-    const markersFolderPath = './images/ar_markers/';
+		let json_str = JSON.stringify(data);
+    let SettingsJson = json_str.replace(/"/gi, '\"');
+    console.log(markers.length);
 
-    const markerInfo = data.markers_settings;
-    console.log("Number of markers: ", markerInfo.length);
-    for (let i = 0; i < markerInfo.length; i++) {
-      let marker_name = markerInfo[i].marker_name;
-      let imagePath = `${markersFolderPath}${marker_name}`;
-      let img = new Image();
-      img.src = imagePath;
-
+    for (let i = 0; i < markers.length; i++) {
+      const marker_id = i;
+      const img = markers[marker_id];
       canvasImg.width = img.width;
       canvasImg.height = img.height;
       contextImg.drawImage(img, 0, 0);
@@ -165,19 +162,16 @@ function initEmscriptenFunctionsAndMarkers() {
       const bufferSizeMarker = img.width * img.height * 4;
       const markerBuf = wasmModule._malloc(bufferSizeMarker);
       wasmModule.HEAPU8.set(markerData.data, markerBuf);
-
-      const marker_id = markerInfo[i].marker_id;
+      console.log("Hi");
       addMarker(marker_id, markerBuf, img.width, img.height);
+      console.log("Hi 2");
       wasmModule._free(markerBuf);
       wasmModule._free(markerData);
     }
+    finalizeMarkers();
 
-		let json_str = JSON.stringify(data);
-    let SettingsJson = json_str.replace(/"/gi, '\"');
 		addMarkerSettings(SettingsJson);
     console.log("Marker Settings were added");
-
-    finalizeMarkers();
     canvasImg = undefined;
   });
 }
